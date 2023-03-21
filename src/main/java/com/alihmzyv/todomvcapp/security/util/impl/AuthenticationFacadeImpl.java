@@ -1,6 +1,6 @@
 package com.alihmzyv.todomvcapp.security.util.impl;
 
-import com.alihmzyv.todorestservice.security.util.AuthenticationFacade;
+import com.alihmzyv.todomvcapp.security.util.AuthenticationFacade;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;

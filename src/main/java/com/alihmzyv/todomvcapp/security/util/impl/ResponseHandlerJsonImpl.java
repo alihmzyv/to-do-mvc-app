@@ -1,6 +1,6 @@
 package com.alihmzyv.todomvcapp.security.util.impl;
 
-import com.alihmzyv.todorestservice.security.util.ResponseHandler;
+import com.alihmzyv.todomvcapp.security.util.ResponseHandler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

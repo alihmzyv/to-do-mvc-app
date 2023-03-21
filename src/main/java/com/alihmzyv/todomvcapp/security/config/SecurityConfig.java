@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers(permitPathsAll.toArray(String[]::new)).permitAll()
                 .anyRequest().hasAnyAuthority("ROLE_USER").and()
                 .apply(jwtHttpConfigurer).and()
+                .formLogin().disable()
                 .build();
     }
 

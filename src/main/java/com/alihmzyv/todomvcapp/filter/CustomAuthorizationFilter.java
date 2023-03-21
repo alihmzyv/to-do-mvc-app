@@ -60,8 +60,6 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        String servletPath = request.getServletPath();
-        return permitAllPaths.stream()
-               .anyMatch(path -> pathMatcher.match(path, servletPath));
+        return true; //TODO:
     }
 }
