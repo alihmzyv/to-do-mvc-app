@@ -1,6 +1,6 @@
 package com.alihmzyv.todomvcapp.filter;
 
-import com.alihmzyv.todomvcapp.exception.security.CustomAuthorizationException;
+import com.alihmzyv.todomvcapp.exception.LoginException;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -33,6 +33,7 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
     private final List<String> permitAllPaths;
     private final PathMatcher pathMatcher = new AntPathMatcher();
 
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
         Optional<Cookie[]> cookiesOpt = Optional.ofNullable(request.getCookies());
@@ -51,15 +52,17 @@ public class CustomAuthorizationFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(subject, null, authorities);
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }, () -> {
-                    throw new CustomAuthorizationException("Login please"); //TODO: handle
+                    throw new LoginException("Login please"); //TODO: handle
                 }), () -> {
-            throw new CustomAuthorizationException("Login please"); //TODO: handle + JWT verification exception
+            throw new LoginException("Login please"); //TODO: handle + JWT verification exception
         });
         filterChain.doFilter(request, response);
     }
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return true; //TODO:
+        String servletPath = request.getServletPath();
+        return permitAllPaths.stream()
+                .anyMatch(path -> pathMatcher.match(path, servletPath));
     }
 }

@@ -34,6 +34,9 @@
                 <h1 class="welcome-title">Welcome back!</h1>
                 <p class="welcome-text">To keep connected with us please login with personal information by email
                     address and password</p>
+                <div>
+                    <p th:if="${ex != null}" th:text="${ex.message}" class="global-error"></p>
+                </div>
                 <form class="login-form" id="login-form" th:object="${loginFormDto}" th:action="@{login}"
                       method="post">
                     <div class="text-input-container">
@@ -43,8 +46,9 @@
                   </span>
                 </span>
                         <input type="email" class="form-control" th:field="*{emailAddress}" placeholder="Email address"
-                               value="">
-                        <div th:if="${#fields.hasErrors('emailAddress')}" th:errors="*{emailAddress}"
+                               value="" required>
+                        <div th:if="${#fields.hasErrors('emailAddress')}" th:errorclass="error"
+                             th:errors="*{emailAddress}"
                              class="invalid-feedback"></div>
                     </div>
                     <div class="text-input-container">
@@ -54,18 +58,21 @@
                   </span>
                 </span>
                         <input type="password" class="form-control" th:field="*{password}" placeholder="Password"
-                               value="">
-                        <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}"
+                               value="" required>
+                        <div th:if="${#fields.hasErrors('password')}" th:errorclass="error" th:errors="*{password}"
                              class="invalid-feedback"></div>
                     </div>
                     <div class="login-options">
                         <div class="checkbox-container">
-                            <input type="checkbox" class="login-section-container-options-old-checkbox"
-                                   th:checked="*{rememberMe}" name="remember-user" id="remember-user" th:value="true">
-                            <div th:if="${#fields.hasErrors('rememberMe')}" th:errors="*{rememberMe}"
+                            <input type="checkbox" class="checkbox-input"
+                                   th:checked="*{rememberMe}"
+                                   name="rememberMe" id="rememberMe"
+                                   th:value="true">
+                            <label class="checkbox-overlay" for="rememberMe">Remember me</label>
+                            <div th:if="${#fields.hasErrors('rememberMe')}" th:errorclass="error"
+                                 th:errors="*{rememberMe}"
                                  class="invalid-feedback"></div>
                             <span class="login-section-container-options-checkmark"></span>
-                            <label class="checkbox-overlay" for="remember-user">Remember me</label>
                         </div>
                         <a href="reset-password.html" class="form-link">Forgot password?</a>
                     </div>

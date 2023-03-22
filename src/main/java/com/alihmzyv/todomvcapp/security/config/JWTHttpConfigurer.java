@@ -1,4 +1,4 @@
-package com.alihmzyv.todomvcapp.security;
+package com.alihmzyv.todomvcapp.security.config;
 
 import com.alihmzyv.todomvcapp.filter.CustomAuthorizationFilter;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public class JWTHttpConfigurer extends AbstractHttpConfigurer<JWTHttpConfigurer, HttpSecurity> {
     private final Algorithm algorithm;
-    @Value("#{'${jwt.permit.all.paths.all}'.split(', ')}")
+    @Value("#{'${permit.all.paths.all}'.split(', ')}")
     private List<String> permitAllPaths;
     private final Environment env;
 

@@ -1,16 +1,17 @@
 package com.alihmzyv.todomvcapp.controller;
 
+import com.alihmzyv.todomvcapp.config.CookieProperties;
+import com.alihmzyv.todomvcapp.exception.LoginException;
 import com.alihmzyv.todomvcapp.model.dto.base.BaseResponse;
+import com.alihmzyv.todomvcapp.model.dto.error.ErrorResponse;
 import com.alihmzyv.todomvcapp.model.dto.security.TokenDto;
 import com.alihmzyv.todomvcapp.model.dto.user.LoginFormDto;
-import com.alihmzyv.todomvcapp.model.dto.user.RegisterUserDto;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,6 +24,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpMethod.POST;
 
@@ -30,9 +33,9 @@ import static org.springframework.http.HttpMethod.POST;
 @RequiredArgsConstructor
 @Controller
 @RequestMapping("/")
-public class LoginSignupController {
+public class LoginController {
     private final RestTemplate restTemplate;
-    private final Environment env;
+    private final CookieProperties cookieProperties;
 
     @GetMapping("/login")
     public ModelAndView showLoginForm(ModelAndView mav) {
@@ -47,38 +50,47 @@ public class LoginSignupController {
             @ModelAttribute @Valid LoginFormDto loginFormDto,
             BindingResult bindingResult,
             HttpServletResponse response) {
+        log.info("Inside login controller");
         if (bindingResult.hasErrors()) {
             return mav;
         }
-        log.info("Inside login controller");
+
+        //send request
         ParameterizedTypeReference<BaseResponse<List<TokenDto>>> responseType =
-                new ParameterizedTypeReference<>() {
-                };
+                new ParameterizedTypeReference<>() {};
         ResponseEntity<BaseResponse<List<TokenDto>>> responseEntity = restTemplate.exchange(
                 "/login",
                 POST,
                 new HttpEntity<>(loginFormDto),
                 responseType);
-        if (responseEntity.getStatusCode().is2xxSuccessful()) {
-            log.info("Status: success");
-            BaseResponse<List<TokenDto>> body = responseEntity.getBody();
-            log.info("Response: {}", body);
-            String accessToken = body.getPayload().stream()
+
+        log.info("Status: success");
+        BaseResponse<List<TokenDto>> respBody = Optional.ofNullable(responseEntity.getBody())
+                .orElseThrow(() -> new LoginException("An error happened. Please, try again"));
+        log.info("Response: {}", respBody);
+
+        boolean success = responseEntity.getStatusCode().is2xxSuccessful();
+
+        if (success) {
+            List<TokenDto> payload = respBody.getPayload();
+            String accessToken = payload.stream()
                     .filter(tokenDto -> tokenDto.getName().equalsIgnoreCase("access-token"))
                     .findFirst()
                     .map(TokenDto::getBody)
-                    .orElseThrow(() -> new RuntimeException("not implemented"));
-            String refreshToken = responseEntity.getBody().getPayload().stream()
+                    .orElseThrow(() -> new LoginException("An error happened. Please, try again"));
+            String refreshToken = payload.stream()
                     .filter(tokenDto -> tokenDto.getName().equalsIgnoreCase("refresh-token"))
                     .findFirst()
                     .map(TokenDto::getBody)
-                    .orElseThrow(() -> new RuntimeException("not implemented"));
-            Cookie accessCookie = new Cookie(env.getProperty("access.cookie.name"), accessToken);
+                    .orElseThrow(() -> new LoginException("An error happened. Please, try again"));
+            Cookie accessCookie = new Cookie(cookieProperties.getAccessName(), accessToken);
             accessCookie.setHttpOnly(true);
-            if (loginFormDto.getRememberMe()) {
-                accessCookie.setMaxAge(env.getProperty("cookie.age.seconds", Integer.class));
-                Cookie refreshCookie = new Cookie(env.getProperty("refresh.cookie.name"), refreshToken);
-                refreshCookie.setMaxAge(env.getProperty("cookie.age.seconds", Integer.class));
+            Boolean rememberMe = loginFormDto.getRememberMe();
+            log.info("Remembered: {}", rememberMe);
+            if (rememberMe) {
+                accessCookie.setMaxAge(cookieProperties.getAgeSeconds());
+                Cookie refreshCookie = new Cookie(cookieProperties.getRefreshName(), refreshToken);
+                refreshCookie.setMaxAge(cookieProperties.getAgeSeconds());
                 refreshCookie.setPath("/login/refresh");
                 refreshCookie.setHttpOnly(true);
                 response.addCookie(accessCookie);
@@ -87,16 +99,12 @@ public class LoginSignupController {
                 accessCookie.setMaxAge(-1);
                 response.addCookie(accessCookie);
             }
+            return new ModelAndView("redirect:/landing");
         } else {
-            throw new RuntimeException();
+            String errors = respBody.getErrors().stream()
+                    .map(ErrorResponse::getMessage)
+                    .collect(Collectors.joining());
+            throw new LoginException(errors);
         }
-        return new ModelAndView("redirect:/landing");
-    }
-
-    @GetMapping("/signup")
-    public ModelAndView signup(ModelAndView mav) {
-        mav.addObject("registerUserDto", new RegisterUserDto());
-        mav.setViewName("sign-up");
-        return mav;
     }
 }
