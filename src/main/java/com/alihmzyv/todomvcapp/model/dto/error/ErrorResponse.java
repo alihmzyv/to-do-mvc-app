@@ -1,9 +1,6 @@
 package com.alihmzyv.todomvcapp.model.dto.error;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -12,6 +9,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Getter
 @Setter
+@ToString
 @Builder
 public class ErrorResponse {
     private Integer code;

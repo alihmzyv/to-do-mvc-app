@@ -35,7 +35,7 @@
                 <p class="welcome-text">To keep connected with us please login with personal information by email
                     address and password</p>
                 <div>
-                    <p th:if="${ex != null}" th:text="${ex.message}" class="global-error"></p>
+                    <p id="ex-message" th:if="${ex != null}" th:text="${ex.message}" class="global-error"></p>
                 </div>
                 <form class="login-form" id="login-form" th:object="${loginFormDto}" th:action="@{login}"
                       method="post">
@@ -78,7 +78,7 @@
                     </div>
                     <div class="button-container">
                         <input type="submit" class="btn btn-dark" placeholder="Login Now">
-                        <a href="/sign-up" class="btn btn-light">Create account</a>
+                        <a href="/signup" class="btn btn-light">Create account</a>
                     </div>
                 </form>
                 <div class="login-social-links">
