@@ -1,7 +1,6 @@
-package com.alihmzyv.todomvcapp.security;
+package com.alihmzyv.todomvcapp.security.config;
 
 import com.alihmzyv.todomvcapp.filter.CustomAuthorizationFilter;
-import com.alihmzyv.todomvcapp.security.util.ResponseHandler;
 import com.auth0.jwt.algorithms.Algorithm;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,11 +15,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Component
 public class JWTHttpConfigurer extends AbstractHttpConfigurer<JWTHttpConfigurer, HttpSecurity> {
-
-    private final ResponseHandler responseHandler;
-    private final JwtProperties jwtProperties;
     private final Algorithm algorithm;
-    @Value("#{'${jwt.permit.all.paths.all}'.split(', ')}")
+    @Value("#{'${permit.all.paths.all}'.split(', ')}")
     private List<String> permitAllPaths;
     private final Environment env;
 
